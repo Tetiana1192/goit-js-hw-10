@@ -15,41 +15,49 @@ const refs = {
 
 refs.searchInputBox.addEventListener('input', debounce(onInputCountry, DEBOUNCE_DELAY));
 
-function onInputCountry(event) {
-    event.preventDefault();
+
+
+  function onInputCountry(event) {
+  const countryName = event.target.value.trim();
+
+  if (countryName === '') {
+    refs.countryList();
+    refs.countryInfo();
+  } else {
+    fetchCountries(countryName)
+      .then(countrys => {
+          if (countrys.length > 10) {
+              Notify.info('Too many matches found. Please enter a more specific name');
+              refs.countryList();
+              refs.countryInfo();
+          } else if (countrys.length >= 2 && countrys.length <= 10) {
+              refs.countryInfo();
+          refs.countryList.innerHTML = countriesListTemplate(value);
+        } else {
+         refs.countryList();
+          refs.countryInfo.innerHTML = countryInfoTemplate(value);
+        }
+          
+      })
+      .catch(error => {
+        console.log(error);
+        Notify.failure('Oops, there is no country with that name');
+      });
+  }
+}  
     
-    const onInputCountry = event.target.value.trim();
-
-    if (onInputCountry.length === 1) {
-        return Notify.info('Too many matches found. Please enter a more specific name.');
-    }
-
-    if (onInputCountry.length > 10) {
-        return Notify.failure('Oops, there is no country with that name.');
-    }
-
-    fetchCountries(event.target.value)
-        .then(value => {
-            console.log(value);
-            if (!value) {
-                return Notify.info('Please enter any character');
-            }
-            parseValue(value);
-        })
-        .catch(error => {
-            alert(error);
-        });
+    function countriesListTemplate() {
+  refs.countryList.innerHTML = '';
 }
-function parseValue(result) {
-    refs.countryInfo.innerHTML = ' ';
-    refs.countryList.innerHTML = ' ';
 
-    if (result.length === 1) {
-        refs.countryInfo.innerHTML = countryInfoTemplate(result);
-    } else {
-        refs.countryList.innerHTML = countriesListTemplate(result);
-    }
+function countryInfoTemplate() {
+  refs.countryInfo.innerHTML = '';
 }
+
+
+
+    
+
 
 function countriesListTemplate(countryArray) {
     return countryArray
